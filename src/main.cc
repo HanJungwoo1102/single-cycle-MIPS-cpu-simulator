@@ -2,7 +2,6 @@
 #include <fstream>
 
 #include "MIPSCpuSimulator.h"
-#include "Util.h"
 
 const char* REG_PRINT_MODE = "reg";
 const char* MEM_PRINT_MODE = "mem";
@@ -14,14 +13,9 @@ int main(int argc, char **argv) {
         int simulatedInstructionMaxCount = std::atoi(argv[2]);
         char* printMode = argv[3];
 
-        std::cout << "file name : " << fileName << std::endl;
-        std::cout << "N : " << simulatedInstructionMaxCount << std::endl;
-        std::cout << "print mode : " << printMode << std::endl;
-
         std::ifstream inFile(fileName, std::ifstream::binary|std::ifstream::ate);
 
         MIPSCpuSimulator mIPSCpuSimulator = MIPSCpuSimulator();
-
         if (inFile.is_open()) {
             char* buffer;
             long size = inFile.tellg();
@@ -43,24 +37,23 @@ int main(int argc, char **argv) {
                 mIPSCpuSimulator.addInstruction(instruction);
             }
         }
+        try {
+            mIPSCpuSimulator.simulate(simulatedInstructionMaxCount);
 
-        mIPSCpuSimulator.simulate(simulatedInstructionMaxCount);
+            if (std::strcmp(printMode, REG_PRINT_MODE) == 0) {
+                mIPSCpuSimulator.printRegister();
+            } else if (std::strcmp(printMode, MEM_PRINT_MODE) == 0) {
+                if (argc == 6) {
+                    int startMemoryAddress = Util::convertHexStringToInt(argv[4]);
+                    int printCount = std::atoi(argv[5]);
 
-        if (std::strcmp(printMode, REG_PRINT_MODE) == 0) {
-            mIPSCpuSimulator.printRegister();
-        } else if (std::strcmp(printMode, MEM_PRINT_MODE) == 0) {
-            if (argc == 6) {
-                int startMemoryAddress = Util::convertHexStringToInt(argv[4]);
-                int printCount = std::atoi(argv[5]);
-
-                std::cout << "starting address : " << startMemoryAddress << std::endl;
-                std::cout << "number to print : " << printCount << std::endl;
-
-                mIPSCpuSimulator.printMemory();
+                    mIPSCpuSimulator.printMemory(startMemoryAddress, printCount);
+                }
             }
+
+        } catch(int error) {
+            std::cout << "unknown instruction" << std::endl;
         }
     }
-    std::cout << "================================" << std::endl;
-
     return 0;
 }

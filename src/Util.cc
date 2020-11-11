@@ -76,3 +76,71 @@ int Util::convertHexStringToInt(char* hexString) {
 
   return result;
 }
+
+char* Util::convertIntToHexString(char* hexString, int integer) {
+  hexString[0] = '0';
+  hexString[1] = 'x';
+  for (int i = 0; i < 8; i++) {
+    
+    int byteInteger = (integer >> 4 * (7 - i)) & (0x0000000f);
+    char byteChar;
+    switch (byteInteger)
+    {
+    case 0:
+      byteChar = '0';
+      break;
+    case 1:
+      byteChar = '1';
+      break;
+    case 2:
+      byteChar = '2';
+      break;
+    case 3:
+      byteChar = '3';
+      break;
+    case 4:
+      byteChar = '4';
+      break;
+    case 5:
+      byteChar = '5';
+      break;
+    case 6:
+      byteChar = '6';
+      break;
+    case 7:
+      byteChar = '7';
+      break;
+    case 8:
+      byteChar = '8';
+      break;
+    case 9:
+      byteChar = '9';
+      break;
+    case 10:
+      byteChar = 'a';
+      break;
+    case 11:
+      byteChar = 'b';
+      break;
+    case 12:
+      byteChar = 'c';
+      break;
+    case 13:
+      byteChar = 'd';
+      break;
+    case 14:
+      byteChar = 'e';
+      break;
+    case 15:
+      byteChar = 'f';
+      break;
+    
+    default:
+      break;
+    }
+
+    hexString[2 + i] = byteChar;
+  }
+  hexString[10] = NULL;
+  return hexString;
+}

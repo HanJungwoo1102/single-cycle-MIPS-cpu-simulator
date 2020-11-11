@@ -16,20 +16,12 @@ void MIPSCpuSimulator::addInstruction(int instruction) {
 
 void MIPSCpuSimulator::simulate(int n) {
   for (int i = 0; i < n; i++) {
-    MIPSCpuSimulator::printRegister();
     int instructionAddress = MIPSCpuSimulator::registerSet.getRegister(MIPSCpuSimulator::PC_REGISTER_NUMBER);
 
     int instruction = MIPSCpuSimulator::instructionMemory.get(instructionAddress);
 
-    std::cout << instruction << std::endl;
-    if (instruction == 0xFFFFFFFF) {
-      break;
-    }
-
-    std::cout << "----------------(" << i + 1 << ")---" << std::endl;
     MIPSCpuSimulator::excuteInstruction(instructionAddress, instruction);
   }
-  std::cout << "-----------------------------" << std::endl;
 }
 
 void MIPSCpuSimulator::excuteInstruction(int instructionAddress, int instruction) {
@@ -48,91 +40,87 @@ void MIPSCpuSimulator::excuteInstruction(int instructionAddress, int instruction
 
   int pc = instructionAddress + 4;
 
-  if (op == 0) {
-    if (funct == 32) {
-      printf("add $%d, $%d, $%d\n", rd, rs, rt);
-      MIPSCpuSimulator::registerSet.setRegitser(rd, rsData + rtData);
-    } else if (funct == 34) {
-      printf("sub $%d, $%d, $%d\n", rd, rs, rt);
+  if (instruction == 0) {
+    printf("nop\n");
+  } else if (op == 0 && funct == 32) {
+    printf("add $%d, $%d, $%d\n", rd, rs, rt);
+    MIPSCpuSimulator::registerSet.setRegitser(rd, rsData + rtData);
+  } else if (op == 0 && funct == 34) {
+    printf("sub $%d, $%d, $%d\n", rd, rs, rt);
 
-      MIPSCpuSimulator::registerSet.setRegitser(rd, rsData - rtData);
-    } else if (funct == 36) {
-      printf("and $%d, $%d, $%d\n", rd, rs, rt);
+    MIPSCpuSimulator::registerSet.setRegitser(rd, rsData - rtData);
+  } else if (op == 0 && funct == 36) {
+    printf("and $%d, $%d, $%d\n", rd, rs, rt);
 
-      MIPSCpuSimulator::registerSet.setRegitser(rd, rsData & rtData);
-    } else if (funct == 37) {
-      printf("or $%d, $%d, $%d\n", rd, rs, rt);
+    MIPSCpuSimulator::registerSet.setRegitser(rd, rsData & rtData);
+  } else if (op == 0 && funct == 37) {
+    printf("or $%d, $%d, $%d\n", rd, rs, rt);
 
-      MIPSCpuSimulator::registerSet.setRegitser(rd, rsData | rtData);
-    } else if (funct == 42) {
-      printf("slt $%d, $%d, $%d\n", rd, rs, rt);
+    MIPSCpuSimulator::registerSet.setRegitser(rd, rsData | rtData);
+  } else if (op == 0 && funct == 42) {
+    printf("slt $%d, $%d, $%d\n", rd, rs, rt);
 
-      MIPSCpuSimulator::registerSet.setRegitser(rd, rsData < rtData ? 1 : 0);
-    } else {
-      std::cout << "nop" << std::endl;
+    MIPSCpuSimulator::registerSet.setRegitser(rd, rsData < rtData ? 1 : 0);
+  } else if (op == 8) {
+    printf("addi $%d, $%d, %d\n", rt, rs, immediate);
+
+    int data = rsData + immediate;
+
+    MIPSCpuSimulator::registerSet.setRegitser(rt, data);
+  } else if (op == 12) {
+    printf("andi $%d, $%d, %d\n", rt, rs, immediate);
+
+    int data = rsData & unsignedExtendedImmediate;
+
+    MIPSCpuSimulator::registerSet.setRegitser(rt, data);
+  } else if (op == 13) {
+    printf("ori $%d, $%d, %d\n", rt, rs, immediate);
+
+    int data = rsData | unsignedExtendedImmediate;
+
+    MIPSCpuSimulator::registerSet.setRegitser(rt, data);
+  } else if (op == 10) {
+    printf("slti $%d, $%d, %d\n", rt, rs, immediate);
+
+    int data = rsData < immediate ? 1: 0;
+
+    MIPSCpuSimulator::registerSet.setRegitser(rt, data);
+  } else if (op == 15) {
+    printf("lui $%d, %d\n", rt, immediate);
+
+    int data = immediate << 16;
+
+    MIPSCpuSimulator::registerSet.setRegitser(rt, data);
+  } else if (op == 35) {
+    printf("lw $%d, %d($%d)\n", rt, immediate, rs);
+    int memoryAddress = rsData + immediate;
+
+    int data = MIPSCpuSimulator::dataMemory.getData(memoryAddress);
+
+    MIPSCpuSimulator::registerSet.setRegitser(rt, data);
+  } else if (op == 43) {
+    printf("sw $%d, %d($%d)\n", rt, immediate, rs);
+    int memoryAddress = rsData + immediate;
+
+    MIPSCpuSimulator::dataMemory.setData(memoryAddress, rtData);
+  } else if (op == 4) {
+    printf("beq $%d, $%d, %d\n", rs, rt, immediate);
+
+    if (rsData == rtData) {
+      pc += immediate * 4;
     }
+  } else if (op == 5) {
+    printf("bne $%d, $%d, %d\n", rs, rt, immediate);
+
+    if (rsData != rtData) {
+      pc += immediate * 4;
+    }
+  } else if (op == 2) {
+    printf("j $%d\n", targetAddress);
+
+    pc = targetAddress * 4;
   } else {
-    if (op == 8) {
-      printf("addi $%d, $%d, %d\n", rt, rs, immediate);
-
-      int data = rsData + immediate;
-
-      MIPSCpuSimulator::registerSet.setRegitser(rt, data);
-    } else if (op == 12) {
-      printf("andi $%d, $%d, %d\n", rt, rs, immediate);
-
-      int data = rsData & unsignedExtendedImmediate;
-
-      MIPSCpuSimulator::registerSet.setRegitser(rt, data);
-    } else if (op == 13) {
-      printf("ori $%d, $%d, %d\n", rt, rs, immediate);
-
-      int data = rsData | unsignedExtendedImmediate;
-
-      MIPSCpuSimulator::registerSet.setRegitser(rt, data);
-    } else if (op == 10) {
-      printf("slti $%d, $%d, %d\n", rs, rt, immediate);
-
-      int data = rsData < immediate ? 1: 0;
-
-      MIPSCpuSimulator::registerSet.setRegitser(rt, data);
-    } else if (op == 15) {
-      printf("lui $%d, %d\n", rt, immediate);
-
-      int data = immediate << 16;
-
-      MIPSCpuSimulator::registerSet.setRegitser(rt, data);
-    } else if (op == 36) {
-      printf("lw $%d, %d($%d)\n", rs, immediate, rt);
-      int memoryAddress = rtData + immediate;
-
-      int data = MIPSCpuSimulator::dataMemory.getData(memoryAddress);
-
-      MIPSCpuSimulator::registerSet.setRegitser(rs, data);
-    } else if (op == 43) {
-      printf("sw $%d, %d($%d)\n", rt, immediate, rs);
-      int memoryAddress = rsData + immediate;
-
-      MIPSCpuSimulator::dataMemory.setData(memoryAddress, rtData);
-    } else if (op == 4) {
-      printf("beq $%d, $%d, %d\n", rs, rt, immediate);
-
-      if (rsData == rtData) {
-        pc += immediate * 4;
-      }
-    } else if (op == 5) {
-      printf("bne $%d, $%d, %d\n", rs, rt, immediate);
-
-      if (rsData != rtData) {
-        pc += immediate * 4;
-      }
-    } else if (op == 2) {
-      printf("j $%d\n", targetAddress);
-
-      pc = targetAddress * 4;
-    } else {
-      std::cout << "nop" << std::endl;
-    }
+    throw 1;
   }
 
   MIPSCpuSimulator::registerSet.setRegitser(MIPSCpuSimulator::PC_REGISTER_NUMBER, pc);
@@ -141,12 +129,20 @@ void MIPSCpuSimulator::excuteInstruction(int instructionAddress, int instruction
 void MIPSCpuSimulator::printRegister() {
   for (int i = 0; i < 32; i++) {
     int data = MIPSCpuSimulator::registerSet.getRegister(i);
-    std::cout << "$" << std::dec << i << ":" << std::hex << data << std::endl;
+    char hexString[11];
+    Util::convertIntToHexString(hexString, data);
+    std::cout << "$" << std::dec << i << ": " << hexString << std::endl;
   }
 }
 
-void MIPSCpuSimulator::printMemory() {
-  
+void MIPSCpuSimulator::printMemory(int startMemoryAddress, int printCount) {
+  for (int i = 0; i < printCount; i++) {
+    int memoryAddress = startMemoryAddress + i * 4;
+    int data = MIPSCpuSimulator::dataMemory.getData(memoryAddress);
+    char hexString[11];
+    Util::convertIntToHexString(hexString, data);
+    std::cout << hexString << std::endl;
+  }
 }
 
 int MIPSCpuSimulator::getOp(int inst) {

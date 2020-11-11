@@ -1,6 +1,8 @@
 #include "DataMemory.h"
 #include "InstructionMemory.h"
 #include "Register.h"
+#include "Util.h"
+
 #include <iostream>
 
 class MIPSCpuSimulator {
@@ -29,5 +31,5 @@ class MIPSCpuSimulator {
     void excuteInstruction(int instructionAddress, int instruction);
 
     void printRegister();
-    void printMemory();
+    void printMemory(int startMemoryAddress, int printCount);
 };
