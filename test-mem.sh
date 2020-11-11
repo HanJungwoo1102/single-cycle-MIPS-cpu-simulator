@@ -1,1 +1,1 @@
-./mips-sim ./test/proj2_3.bin 15 mem 0x10000000 10
+./mips-sim ./test/proj2_3.bin 905 mem 0x10000000 10

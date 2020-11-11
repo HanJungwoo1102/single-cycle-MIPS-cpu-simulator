@@ -7,7 +7,6 @@ const char* REG_PRINT_MODE = "reg";
 const char* MEM_PRINT_MODE = "mem";
 
 int main(int argc, char **argv) {
-    std::cout << "================================" << std::endl;
     if (argc > 3) {
         char* fileName = argv[1];
         int simulatedInstructionMaxCount = std::atoi(argv[2]);
@@ -37,22 +36,17 @@ int main(int argc, char **argv) {
                 mIPSCpuSimulator.addInstruction(instruction);
             }
         }
-        try {
-            mIPSCpuSimulator.simulate(simulatedInstructionMaxCount);
+        mIPSCpuSimulator.simulate(simulatedInstructionMaxCount);
 
-            if (std::strcmp(printMode, REG_PRINT_MODE) == 0) {
-                mIPSCpuSimulator.printRegister();
-            } else if (std::strcmp(printMode, MEM_PRINT_MODE) == 0) {
-                if (argc == 6) {
-                    int startMemoryAddress = Util::convertHexStringToInt(argv[4]);
-                    int printCount = std::atoi(argv[5]);
+        if (std::strcmp(printMode, REG_PRINT_MODE) == 0) {
+            mIPSCpuSimulator.printRegister();
+        } else if (std::strcmp(printMode, MEM_PRINT_MODE) == 0) {
+            if (argc == 6) {
+                int startMemoryAddress = Util::convertHexStringToInt(argv[4]);
+                int printCount = std::atoi(argv[5]);
 
-                    mIPSCpuSimulator.printMemory(startMemoryAddress, printCount);
-                }
+                mIPSCpuSimulator.printMemory(startMemoryAddress, printCount);
             }
-
-        } catch(int error) {
-            std::cout << "unknown instruction" << std::endl;
         }
     }
     return 0;
